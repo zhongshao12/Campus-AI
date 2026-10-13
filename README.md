@@ -1,5 +1,7 @@
 # Campus AI — AI 校园恋爱物语
 
+![Campus AI 恋爱物语](assets/cover.png)
+
 > **Windows 桌面单机优先 · AI 驱动的开放式 2D 校园恋爱 Galgame**
 >
 > 核心机制：云端大模型驱动自然对话与人设演绎，规则引擎（Arbitrator）裁决好感度与世界状态，本地 ComfyUI / 预制图谱呈现立绘与 CG，全自主校园时空与分层长期记忆。
