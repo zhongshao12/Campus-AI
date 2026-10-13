@@ -1,7 +1,7 @@
 <template>
   <header class="hud-container">
-    <!-- 左侧：世界时空与地点信息 -->
-    <div class="hud-left glass-card">
+    <!-- 左侧：世界时空与地点 (暖纸漫画标签) -->
+    <div class="hud-left paper-card">
       <div class="date-badge">
         <span class="day-number">Day {{ world?.day_number || 1 }}</span>
         <span class="weekday">{{ world?.weekday || '星期三' }}</span>
@@ -18,8 +18,8 @@
       </div>
     </div>
 
-    <!-- 中间：角色好感度与心动仪表盘 -->
-    <div class="hud-center glass-card" v-if="character">
+    <!-- 中间：角色好感度与心动槽 (珊瑚粉暖色仪表盘) -->
+    <div class="hud-center paper-card" v-if="character">
       <div class="character-hud-info">
         <span class="char-name">{{ character.name }}</span>
         <span class="stage-tag" :class="character.stage">{{ stageDisplayName }}</span>
@@ -36,11 +36,15 @@
       </div>
     </div>
 
-    <!-- 右侧：全局操作按钮组 -->
-    <div class="hud-right glass-card">
+    <!-- 右侧：全局操作漫画贴纸按钮组 -->
+    <div class="hud-right paper-card">
       <button class="hud-btn phone-btn-highlight" @click="$emit('open-phone')" title="智能手机 (P)">
         <span class="btn-icon">📱</span>
         <span class="btn-label">手机</span>
+      </button>
+      <button class="hud-btn" @click="$emit('open-variables')" title="变量监控 (V)">
+        <span class="btn-icon">📊</span>
+        <span class="btn-label">变量</span>
       </button>
       <button class="hud-btn" @click="$emit('open-map')" title="校园地图">
         <span class="btn-icon">🗺️</span>
@@ -49,10 +53,6 @@
       <button class="hud-btn" @click="$emit('advance-time')" title="推进时间">
         <span class="btn-icon">⏳</span>
         <span class="btn-label">时钟</span>
-      </button>
-      <button class="hud-btn" @click="$emit('open-variables')" title="变量监控 (V)">
-        <span class="btn-icon">📊</span>
-        <span class="btn-label">变量</span>
       </button>
       <button class="hud-btn" @click="$emit('open-history')" title="对话回顾">
         <span class="btn-icon">📜</span>
@@ -114,28 +114,27 @@ const stageDisplayName = computed(() => {
 <style scoped>
 .hud-container {
   position: absolute;
-  top: 16px;
+  top: 14px;
   left: 20px;
   right: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 30;
+  z-index: 40;
   pointer-events: none;
 }
 
-.glass-card {
+/* Cel Glow 暖纸漫画卡片基础类 */
+.paper-card {
   pointer-events: auto;
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 9999px;
-  padding: 8px 18px;
+  background: var(--dialogue-paper-solid, #fffdfa);
+  border: 2px solid var(--dialogue-outline, #7c7066);
+  border-radius: 12px;
+  padding: 6px 16px;
   display: flex;
   align-items: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  color: #f8fafc;
+  box-shadow: 0 4px 0 rgba(74, 61, 54, 0.2);
+  color: var(--dialogue-ink, #3e342f);
 }
 
 .hud-left {
@@ -145,22 +144,22 @@ const stageDisplayName = computed(() => {
 .date-badge {
   display: flex;
   gap: 6px;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 14px;
 }
 
 .day-number {
-  color: #38bdf8;
+  color: var(--dialogue-speech-ink, #8e3b2e);
 }
 
 .weekday {
-  color: #94a3b8;
+  color: var(--dialogue-speech-muted, #9d6150);
 }
 
 .divider {
-  width: 1px;
-  height: 16px;
-  background: rgba(255, 255, 255, 0.15);
+  width: 1.5px;
+  height: 15px;
+  background: var(--dialogue-rule, #e5dcd4);
 }
 
 .time-slot-badge {
@@ -168,25 +167,22 @@ const stageDisplayName = computed(() => {
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .slot-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #fbbf24;
-  box-shadow: 0 0 8px #fbbf24;
+  background: #f59e0b;
 }
 
 .time-slot-badge.dusk .slot-dot {
-  background: #f97316;
-  box-shadow: 0 0 8px #f97316;
+  background: #ea580c;
 }
 
 .time-slot-badge.night .slot-dot {
-  background: #818cf8;
-  box-shadow: 0 0 8px #818cf8;
+  background: #6366f1;
 }
 
 .location-badge {
@@ -194,14 +190,15 @@ const stageDisplayName = computed(() => {
   align-items: center;
   gap: 4px;
   font-size: 13px;
-  color: #e2e8f0;
+  font-weight: 700;
+  color: var(--dialogue-ink, #3e342f);
 }
 
 /* 中间好感度 */
 .hud-center {
   flex-direction: column;
-  padding: 6px 20px;
-  gap: 4px;
+  padding: 5px 18px;
+  gap: 3px;
 }
 
 .character-hud-info {
@@ -211,30 +208,29 @@ const stageDisplayName = computed(() => {
 }
 
 .char-name {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 14px;
-  letter-spacing: 0.5px;
+  color: var(--dialogue-speech-ink, #8e3b2e);
 }
 
 .stage-tag {
-  font-size: 11px;
-  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
   border-radius: 9999px;
-  background: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  background: rgba(224, 123, 108, 0.15);
+  color: var(--accent-hover, #cc6a5c);
+  border: 1px solid rgba(224, 123, 108, 0.35);
 }
 
 .stage-tag.close {
-  background: rgba(244, 63, 94, 0.2);
-  color: #fb7185;
-  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.18);
+  color: #e11d48;
 }
 
 .stage-tag.lover {
-  background: rgba(236, 72, 153, 0.3);
-  color: #f472b6;
-  border-color: #ec4899;
+  background: linear-gradient(135deg, #f43f5e, #ec4899);
+  color: #ffffff;
 }
 
 .affection-meter {
@@ -244,76 +240,74 @@ const stageDisplayName = computed(() => {
 }
 
 .heart-icon {
-  font-size: 13px;
-  animation: pulseHeart 1.8s infinite;
-}
-
-@keyframes pulseHeart {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
+  font-size: 12px;
 }
 
 .meter-track {
-  width: 110px;
+  width: 100px;
   height: 7px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--dialogue-inner, #eee6df);
+  border: 1px solid var(--dialogue-rule, #e5dcd4);
   border-radius: 9999px;
   overflow: hidden;
 }
 
 .meter-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ec4899, #f43f5e);
+  background: linear-gradient(90deg, #f43f5e, #e07b6c);
   border-radius: 9999px;
-  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .affection-num {
-  font-size: 12px;
-  color: #cbd5e1;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dialogue-speech-muted, #9d6150);
   font-family: monospace;
 }
 
 /* 右侧操作按钮 */
 .hud-right {
-  gap: 8px;
-  padding: 4px 12px;
+  gap: 6px;
+  padding: 4px 10px;
 }
 
 .hud-btn {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 8px;
-  color: #e2e8f0;
-  transition: all 0.2s ease;
+  color: var(--dialogue-ink, #3e342f);
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .hud-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(224, 123, 108, 0.12);
+  border-color: rgba(224, 123, 108, 0.3);
+  color: var(--accent-hover, #cc6a5c);
   transform: translateY(-1px);
 }
 
-.hud-btn.phone-btn-highlight {
-  background: rgba(56, 189, 248, 0.2);
-  border: 1px solid rgba(56, 189, 248, 0.4);
+.hud-btn:active {
+  transform: translateY(1px);
 }
 
-.hud-btn.phone-btn-highlight:hover {
-  background: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+.hud-btn.phone-btn-highlight {
+  background: rgba(224, 123, 108, 0.15);
+  border-color: var(--accent, #e07b6c);
+  color: var(--dialogue-speech-ink, #8e3b2e);
 }
 
 .btn-icon {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .btn-label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
 }
 </style>

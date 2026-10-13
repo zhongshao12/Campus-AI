@@ -93,14 +93,14 @@ const selectLocation = (id: string) => {
 }
 
 .glass-modal {
-  background: rgba(15, 23, 42, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 24px;
+  background: var(--dialogue-paper-solid, #fffdfa);
+  border: 2px solid var(--dialogue-outline, #7c7066);
+  border-radius: 20px;
   width: 100%;
   max-width: 640px;
   padding: 24px 28px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
-  color: #f8fafc;
+  box-shadow: 0 10px 0 rgba(74, 61, 54, 0.25), 0 24px 50px rgba(0, 0, 0, 0.35);
+  color: var(--dialogue-ink, #3e342f);
 }
 
 .modal-header {
@@ -112,15 +112,15 @@ const selectLocation = (id: string) => {
 
 .title {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0;
-  color: #38bdf8;
+  color: var(--dialogue-speech-ink, #8e3b2e);
 }
 
 .close-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--dialogue-speech-muted, #9d6150);
   font-size: 18px;
   cursor: pointer;
   padding: 4px 8px;
@@ -129,13 +129,13 @@ const selectLocation = (id: string) => {
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: rgba(224, 123, 108, 0.15);
+  color: var(--accent, #e07b6c);
 }
 
 .subtitle {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--dialogue-speech-muted, #9d6150);
   margin-bottom: 20px;
 }
 
@@ -146,30 +146,32 @@ const selectLocation = (id: string) => {
 }
 
 .location-item {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 16px;
+  background: #ffffff;
+  border: 1.5px solid #d0c3b8;
+  border-radius: 14px;
+  padding: 14px;
   cursor: pointer;
   display: flex;
-  gap: 14px;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  gap: 12px;
+  box-shadow: 0 3px 0 rgba(74, 61, 54, 0.12);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .location-item:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: #38bdf8;
+  background: #fff8f5;
+  border-color: var(--accent, #e07b6c);
   transform: translateY(-2px);
+  box-shadow: 0 5px 0 rgba(224, 123, 108, 0.25);
 }
 
 .location-item.active {
-  background: rgba(14, 165, 233, 0.25);
-  border-color: #0ea5e9;
-  box-shadow: 0 0 16px rgba(14, 165, 233, 0.3);
+  background: #fff1ee;
+  border-color: var(--accent, #e07b6c);
+  box-shadow: 0 0 0 2px var(--accent-light, #f0a89a);
 }
 
 .loc-icon-large {
-  font-size: 32px;
+  font-size: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -187,23 +189,24 @@ const selectLocation = (id: string) => {
 }
 
 .loc-name {
-  font-weight: 700;
-  font-size: 15px;
-  color: #f1f5f9;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--dialogue-speech-ink, #8e3b2e);
 }
 
 .current-badge {
   font-size: 10px;
-  padding: 1px 6px;
+  font-weight: 700;
+  padding: 1px 7px;
   border-radius: 9999px;
-  background: #0284c7;
+  background: var(--accent, #e07b6c);
   color: #ffffff;
 }
 
 .loc-desc {
   font-size: 12px;
-  line-height: 1.5;
-  color: #94a3b8;
+  line-height: 1.45;
+  color: var(--dialogue-ink, #3e342f);
   margin: 0;
 }
 </style>

@@ -286,6 +286,10 @@ body {
   background: radial-gradient(circle at 50% 30%, #ec4899 0%, #be185d 40%, #18181b 100%);
 }
 
+.dormitory .scene-background {
+  background: radial-gradient(circle at 50% 30%, #45342d 0%, #241c19 50%, #0f0c0a 100%);
+}
+
 /* 阳光与氛围光照层 */
 .ambient-glow {
   position: absolute;
@@ -317,7 +321,7 @@ body {
   pointer-events: none;
 }
 
-/* 立绘主舞台 */
+/* 立绘主舞台：立绘自然延伸至底部，下半身由更高层级的切角暖纸对话框遮挡 (Cel Glow 经典布局) */
 .character-stage {
   position: absolute;
   inset: 0;
@@ -325,7 +329,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding-bottom: 210px;
+  padding-bottom: 0px;
   pointer-events: none;
 }
 

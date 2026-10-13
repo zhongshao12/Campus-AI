@@ -600,13 +600,20 @@ onMounted(() => {
 }
 
 .photo-req-btn {
-  background: rgba(56, 189, 248, 0.2);
-  border: 1px solid #38bdf8;
+  background: rgba(224, 123, 108, 0.15);
+  border: 1.5px solid var(--accent, #e07b6c);
   border-radius: 9999px;
-  color: #38bdf8;
+  color: var(--accent, #e07b6c);
   font-size: 11px;
-  padding: 3px 8px;
+  font-weight: 700;
+  padding: 3px 10px;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.photo-req-btn:hover {
+  background: var(--accent, #e07b6c);
+  color: #ffffff;
 }
 
 .messages-scroll {
@@ -652,17 +659,21 @@ onMounted(() => {
 }
 
 .msg-bubble {
-  background: rgba(30, 41, 59, 0.9);
+  background: #ffffff;
   padding: 8px 12px;
   border-radius: 12px;
   font-size: 13px;
   line-height: 1.5;
-  color: #f1f5f9;
+  color: #3e342f;
+  border: 1px solid #e0dcd6;
+  box-shadow: 0 2px 0 rgba(74, 61, 54, 0.08);
 }
 
 .message-row.is-me .msg-bubble {
-  background: #0284c7;
+  background: var(--accent, #e07b6c);
   color: #ffffff;
+  border-color: var(--accent-dark, #8e3b2e);
+  box-shadow: 0 2px 0 rgba(142, 59, 46, 0.25);
 }
 
 .photo-bubble {
@@ -703,13 +714,21 @@ onMounted(() => {
 }
 
 .chat-send-btn {
-  background: #0284c7;
-  border: none;
+  background: var(--accent, #e07b6c);
+  border: 1.5px solid #4a3d36;
   border-radius: 8px;
   color: #ffffff;
   padding: 0 12px;
   font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 2px 0 rgba(74, 61, 54, 0.25);
+  transition: all 0.15s;
+}
+
+.chat-send-btn:active {
+  transform: translateY(2px);
+  box-shadow: none;
 }
 
 /* 朋友圈 */
@@ -725,13 +744,14 @@ onMounted(() => {
 }
 
 .moment-card {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border: 1.5px solid #d0c3b8;
   border-radius: 12px;
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-shadow: 0 3px 0 rgba(74, 61, 54, 0.12);
 }
 
 .moment-header {
@@ -751,19 +771,20 @@ onMounted(() => {
 
 .author-name {
   font-size: 13px;
-  font-weight: 700;
-  color: #38bdf8;
+  font-weight: 800;
+  color: var(--dialogue-speech-ink, #8e3b2e);
 }
 
 .moment-time {
   font-size: 10px;
-  color: #64748b;
+  color: #8c8074;
 }
 
 .moment-content {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
-  color: #e2e8f0;
+  color: #3e342f;
+  font-weight: 500;
 }
 
 .moment-actions {
@@ -772,17 +793,26 @@ onMounted(() => {
 }
 
 .moment-act-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--dialogue-paper-solid, #fffdfa);
+  border: 1.5px solid #7c7066;
   border-radius: 9999px;
-  color: #cbd5e1;
+  color: #554a43;
   font-size: 11px;
-  padding: 3px 10px;
+  font-weight: 700;
+  padding: 3px 12px;
   cursor: pointer;
+  box-shadow: 0 2px 0 rgba(74, 61, 54, 0.15);
+  transition: all 0.15s;
+}
+
+.moment-act-btn:hover {
+  border-color: var(--accent, #e07b6c);
+  color: var(--accent, #e07b6c);
 }
 
 .moment-act-btn.liked {
-  color: #f43f5e;
+  background: rgba(224, 123, 108, 0.15);
+  color: #e11d48;
   border-color: #f43f5e;
 }
 

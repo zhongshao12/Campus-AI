@@ -1,0 +1,50 @@
+/* ═══════════════════════════════════════════════════════
+   Campus AI — Cel Glow Design Tokens
+   参考 icecranberry/galgame-with-comfyUI (邻舍.EXE) 视觉哲学：
+   赛璐璐动漫质感 × 珊瑚暖纸 · 漫画切角描边 · 错位硬阴影 · 软糖贴纸质感
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ── 核心主色系（珊瑚暖色 · 橙粉点睛）── */
+  --accent: #e07b6c;
+  --accent-hover: #cc6a5c;
+  --accent-light: #f0a89a;
+  --accent-dark: #8e3b2e;
+  --accent-rgb: 224, 123, 108;
+  --accent-sub: #ff8a4c;
+  --accent-pink: #f65fa4;
+  --accent-teal: #17c3ab;
+
+  /* ── Galgame 舞台切角暖纸体系 ── */
+  --dialogue-paper: rgba(255, 253, 250, 0.96);
+  --dialogue-paper-solid: #fffdfa;
+  --dialogue-ink: #3e342f;            /* 基础墨色 */
+  --dialogue-speech-ink: #8e3b2e;     /* 角色台词主墨色 (深珊瑚色) */
+  --dialogue-speech-muted: #9d6150;   /* 动作与心声辅助色 */
+  --dialogue-outline: #7c7066;        /* 漫画灰褐墨线描边 */
+  --dialogue-outline-strong: #4a3d36; /* 赛璐璐深描边 */
+  --dialogue-inner: #eee6df;          /* 暖纸内衬描边 */
+  --dialogue-rule: #e5dcd4;           /* 分隔线 */
+
+  /* ── 贴纸按钮与操作控件 ── */
+  --dialogue-menu-bg: rgba(255, 253, 250, 0.98);
+  --dialogue-menu-text: #4a3d36;
+  --dialogue-menu-outline: #766c65;
+  --dialogue-menu-hover: #a34838;
+  --dialogue-menu-accent: #bc8c7d;
+  --dialogue-menu-shadow: 0 4px 0 rgba(74, 61, 54, 0.22);
+  --btn-lip: #b05547;                 /* 贴纸按钮底部厚度 */
+
+  /* ── 赛璐璐硬阴影 (Offset Hard Shadow) ── */
+  --shadow-hard: 0 4px 0 rgba(74, 61, 54, 0.22);
+  --shadow-hard-sm: 0 2px 0 rgba(74, 61, 54, 0.18);
+  --shadow-hard-lg: 0 6px 0 rgba(74, 61, 54, 0.25);
+  --shadow-soft: 0 12px 32px rgba(45, 38, 35, 0.25);
+
+  /* ── 渐变 ── */
+  --grad-brand: linear-gradient(135deg, #e07b6c 0%, #f0a89a 48%, #ff8a4c 100%);
+  --grad-paper: linear-gradient(180deg, #ffffff 0%, #fffdfa 40%, #fbf6f0 100%);
+  --grad-cel-btn: linear-gradient(180deg, #e07b6c 0%, #e07b6c 55%, #d1695a 55%, #d1695a 100%);
+}

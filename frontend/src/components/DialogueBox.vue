@@ -1,45 +1,48 @@
 <template>
   <div class="galgame-dialogue-wrapper" @click="handleBoxClick">
-    <!-- 角色名字标签牌 -->
+    <!-- 斜向漫画贴纸风格姓名铭牌 (参考 Cel Glow 漫画标签设计) -->
     <div class="speaker-tag" :class="{ 'is-narrator': speaker === '旁白' }">
-      <span class="speaker-dot"></span>
+      <div class="tag-corner-accent"></div>
       <span class="speaker-text">{{ speaker }}</span>
       <span class="emotion-badge" v-if="emotion && emotion !== 'neutral'">
         {{ emotionText }}
       </span>
     </div>
 
-    <!-- 经典半透明对话主框体 -->
+    <!-- 经典切角暖纸对话主框体 (TownDialogueStage 风格) -->
     <div class="dialogue-box">
-      <!-- 细微小动作提示 -->
-      <div class="action-hint" v-if="action">
-        <span class="action-bracket">[</span>
-        <span class="action-content">{{ action }}</span>
-        <span class="action-bracket">]</span>
-      </div>
+      <!-- 内部装饰双层线 -->
+      <div class="dialogue-inner-frame">
+        <!-- 动作描写 (棕橙色贴纸风) -->
+        <div class="action-hint" v-if="action">
+          <span class="action-bracket">「</span>
+          <span class="action-content">{{ action }}</span>
+          <span class="action-bracket">」</span>
+        </div>
 
-      <!-- 核心对白内容 (支持打字机动效) -->
-      <div class="dialogue-content">
-        <span class="text-rendered">{{ displayedText }}</span>
-        <span class="typewriter-cursor" v-if="isTyping">|</span>
-      </div>
+        <!-- 核心对白内容 (逐字打字机演出，深珊瑚墨色) -->
+        <div class="dialogue-content">
+          <span class="text-rendered">{{ displayedText }}</span>
+          <span class="typewriter-cursor" v-if="isTyping"></span>
+        </div>
 
-      <!-- 内心独白 (微弱浅紫半透明) -->
-      <div class="inner-thought" v-if="innerThought && !isTyping">
-        <span class="thought-icon">💭</span>
-        <span class="thought-text">（{{ innerThought }}）</span>
-      </div>
+        <!-- 角色内心心声 (柔和紫色心声独白) -->
+        <div class="inner-thought" v-if="innerThought && !isTyping">
+          <span class="thought-icon">💭</span>
+          <span class="thought-text">（{{ innerThought }}）</span>
+        </div>
 
-      <!-- 右下角闪烁小箭头 -->
-      <div class="continue-indicator" :class="{ ready: !isTyping }">
-        ▼
+        <!-- 右下角珊瑚跳动推进指示标 -->
+        <div class="continue-indicator" :class="{ ready: !isTyping }">
+          ▼
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -66,9 +69,10 @@ const emotionText = computed(() => {
     happy: '微笑',
     blush: '脸红心动',
     surprised: '惊讶',
-    thinking: '思考',
-    pout: '鼓嘴微嗔',
-    sad: '低落',
+    thinking: '沉思',
+    pout: '微嗔',
+    sad: '失落',
+    angry: '生气',
   }
   return map[props.emotion || 'neutral'] || ''
 })
@@ -88,11 +92,10 @@ const startTypewriter = (fullText: string) => {
       clearInterval(timer)
       timer = null
     }
-  }, 22) // 22ms 逐字流畅呈现
+  }, 22)
 }
 
 const handleBoxClick = () => {
-  // 点击快速跳过打字机，直接显示完整对白
   if (isTyping.value && timer) {
     clearInterval(timer)
     timer = null
@@ -114,136 +117,164 @@ watch(
 .galgame-dialogue-wrapper {
   position: relative;
   width: 100%;
-  max-width: 960px;
+  max-width: 980px;
   margin: 0 auto;
   cursor: pointer;
   user-select: none;
-  z-index: 25;
+  z-index: 30;
 }
 
-/* 角色姓名标牌 */
+/* 姓名铭牌：漫画斜向贴纸标签 (Cel Glow) */
 .speaker-tag {
   position: absolute;
-  top: -36px;
-  left: 28px;
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95), rgba(15, 23, 42, 0.95));
-  border: 1px solid rgba(147, 197, 253, 0.45);
+  top: -34px;
+  left: 36px;
+  background: var(--dialogue-paper-solid, #fffdfa);
+  border: 2px solid var(--dialogue-outline, #7c7066);
   border-bottom: none;
-  border-radius: 14px 14px 0 0;
-  padding: 6px 24px;
-  color: #ffffff;
+  border-radius: 12px 12px 0 0;
+  padding: 5px 22px 4px 18px;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(10px);
+  box-shadow: 2px -3px 0 rgba(74, 61, 54, 0.15);
+  transform: skewX(-4deg);
+  z-index: 32;
 }
 
 .speaker-tag.is-narrator {
-  background: linear-gradient(135deg, rgba(71, 85, 105, 0.95), rgba(30, 41, 59, 0.95));
-  border-color: rgba(203, 213, 225, 0.3);
+  background: #f5f0ea;
 }
 
-.speaker-dot {
+/* 珊瑚色贴纸小角标 */
+.tag-corner-accent {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: #38bdf8;
-  box-shadow: 0 0 8px #38bdf8;
+  border-radius: 2px;
+  background: var(--accent, #e07b6c);
 }
 
 .speaker-text {
-  font-weight: 700;
-  font-size: 17px;
+  font-weight: 800;
+  font-size: 16px;
   letter-spacing: 1px;
+  color: var(--dialogue-speech-ink, #8e3b2e);
+  transform: skewX(4deg); /* 保持文字直立 */
+}
+
+.speaker-tag.is-narrator .speaker-text {
+  color: #554a43;
 }
 
 .emotion-badge {
   font-size: 11px;
-  padding: 1px 6px;
+  font-weight: 700;
+  padding: 1px 7px;
   border-radius: 9999px;
-  background: rgba(244, 63, 94, 0.25);
-  color: #fb7185;
-  border: 1px solid rgba(244, 63, 94, 0.5);
-  margin-left: 4px;
+  background: rgba(224, 123, 108, 0.15);
+  color: var(--accent-hover, #cc6a5c);
+  border: 1px solid rgba(224, 123, 108, 0.35);
+  transform: skewX(4deg);
 }
 
-/* 对话框主体 */
+/* 核心切角暖纸对话框 (TownDialogueStage) */
 .dialogue-box {
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 18px;
-  padding: 24px 32px;
-  min-height: 125px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  background: var(--dialogue-paper, rgba(255, 253, 250, 0.96));
+  border: 2px solid var(--dialogue-outline, #7c7066);
+  border-radius: 16px;
+  /* 漫画切角多边形视觉 */
+  clip-path: polygon(
+    14px 0%, 100% 0%,
+    100% calc(100% - 14px), calc(100% - 14px) 100%,
+    0% 100%, 0% 14px
+  );
+  box-shadow: 0 8px 0 rgba(74, 61, 54, 0.22), 0 16px 36px rgba(0, 0, 0, 0.2);
+  padding: 6px;
   position: relative;
+  transition: transform 0.2s ease;
+}
+
+/* 内层细描边内衬 */
+.dialogue-inner-frame {
+  border: 1px dashed var(--dialogue-inner, #eee6df);
+  border-radius: 12px;
+  padding: 20px 28px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   gap: 8px;
+  position: relative;
 }
 
+/* 动作描写 */
 .action-hint {
   font-size: 14px;
-  color: #93c5fd;
-  font-style: italic;
+  font-weight: 600;
+  color: var(--dialogue-speech-muted, #9d6150);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .action-content {
-  color: #60a5fa;
+  color: #c2410c;
 }
 
+/* 对话正文 */
 .dialogue-content {
   font-size: 18px;
-  line-height: 1.7;
-  color: #f8fafc;
-  font-weight: 500;
+  line-height: 1.75;
+  color: var(--dialogue-ink, #3e342f);
+  font-weight: 600;
   letter-spacing: 0.5px;
 }
 
 .typewriter-cursor {
   display: inline-block;
-  margin-left: 2px;
-  color: #38bdf8;
-  animation: blink 0.7s infinite;
+  width: 3px;
+  height: 18px;
+  background: var(--accent, #e07b6c);
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: celCursorBlink 0.7s infinite;
 }
 
-@keyframes blink {
+@keyframes celCursorBlink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 
+/* 内心独白 */
 .inner-thought {
   margin-top: 4px;
   font-size: 14px;
-  color: #c084fc;
+  color: #8b5cf6;
   font-style: italic;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
+/* 右下角跳动推进标记 */
 .continue-indicator {
   position: absolute;
-  right: 24px;
-  bottom: 14px;
+  right: 18px;
+  bottom: 12px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  color: var(--dialogue-speech-muted, #9d6150);
+  opacity: 0.4;
+  transition: all 0.2s;
 }
 
 .continue-indicator.ready {
-  color: #38bdf8;
-  animation: floatArrow 1.2s infinite ease-in-out;
+  color: var(--accent, #e07b6c);
+  opacity: 1;
+  animation: carrotJump 0.9s infinite alternate ease-in-out;
 }
 
-@keyframes floatArrow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
+@keyframes carrotJump {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
 }
 </style>

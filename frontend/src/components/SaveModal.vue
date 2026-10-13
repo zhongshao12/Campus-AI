@@ -123,14 +123,14 @@ onMounted(() => {
 }
 
 .glass-modal {
-  background: rgba(15, 23, 42, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 24px;
+  background: var(--dialogue-paper-solid, #fffdfa);
+  border: 2px solid var(--dialogue-outline, #7c7066);
+  border-radius: 20px;
   width: 100%;
   max-width: 680px;
   padding: 24px 28px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
-  color: #f8fafc;
+  box-shadow: 0 10px 0 rgba(74, 61, 54, 0.25), 0 24px 50px rgba(0, 0, 0, 0.35);
+  color: var(--dialogue-ink, #3e342f);
 }
 
 .modal-header {
@@ -138,7 +138,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1.5px solid var(--dialogue-rule, #e5dcd4);
   padding-bottom: 12px;
 }
 
@@ -149,25 +149,27 @@ onMounted(() => {
 
 .tab-btn {
   background: transparent;
-  border: none;
-  font-size: 16px;
-  font-weight: 700;
-  color: #94a3b8;
+  border: 1.5px solid transparent;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dialogue-speech-muted, #9d6150);
   cursor: pointer;
-  padding: 6px 14px;
+  padding: 6px 16px;
   border-radius: 8px;
   transition: all 0.2s;
 }
 
 .tab-btn.active {
-  background: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
+  background: var(--accent, #e07b6c);
+  border-color: var(--accent-dark, #8e3b2e);
+  color: #ffffff;
+  box-shadow: 0 3px 0 rgba(142, 59, 46, 0.3);
 }
 
 .close-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--dialogue-speech-muted, #9d6150);
   font-size: 18px;
   cursor: pointer;
   padding: 4px 8px;
@@ -175,8 +177,8 @@ onMounted(() => {
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: rgba(224, 123, 108, 0.15);
+  color: var(--accent, #e07b6c);
 }
 
 .slots-container {
@@ -188,50 +190,51 @@ onMounted(() => {
 }
 
 .slot-item {
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1.5px solid #d0c3b8;
   border-radius: 14px;
   padding: 14px 16px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  box-shadow: 0 3px 0 rgba(74, 61, 54, 0.12);
   transition: all 0.2s;
 }
 
 .slot-item:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: #38bdf8;
+  border-color: var(--accent, #e07b6c);
   transform: translateY(-2px);
+  box-shadow: 0 5px 0 rgba(224, 123, 108, 0.25);
 }
 
 .slot-item.empty {
-  opacity: 0.6;
+  opacity: 0.65;
 }
 
 .slot-num {
   font-size: 11px;
-  font-weight: 700;
-  color: #38bdf8;
+  font-weight: 800;
+  color: var(--accent, #e07b6c);
   letter-spacing: 1px;
 }
 
 .slot-title {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
-  color: #f1f5f9;
+  color: var(--dialogue-speech-ink, #8e3b2e);
 }
 
 .slot-meta {
   display: flex;
   gap: 8px;
   font-size: 12px;
-  color: #cbd5e1;
+  color: var(--dialogue-ink, #3e342f);
 }
 
 .slot-time {
   font-size: 11px;
-  color: #64748b;
+  color: var(--dialogue-speech-muted, #9d6150);
 }
 
 .slot-empty-body {
@@ -240,13 +243,14 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 16px 0;
-  color: #64748b;
+  color: var(--dialogue-speech-muted, #9d6150);
   font-size: 13px;
   gap: 4px;
 }
 
 .slot-action-tip {
   font-size: 11px;
-  color: #0284c7;
+  color: var(--accent, #e07b6c);
+  font-weight: 700;
 }
 </style>
