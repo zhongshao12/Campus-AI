@@ -1,0 +1,32 @@
+# Campus AI 后端核心配置
+server:
+  host: "127.0.0.1"
+  port: 8000
+  reload: true
+
+database:
+  url: "sqlite+aiosqlite:///../data/game.db"
+
+llm:
+  # 默认使用兼容 OpenAI 格式的云端模型接口 (支持 DeepSeek, OpenAI, Moonshot, Qwen 等)
+  provider: "openai_compatible"
+  api_key: "${LLM_API_KEY}"
+  base_url: "${LLM_BASE_URL:https://api.deepseek.com/v1}"
+  model: "${LLM_MODEL:deepseek-chat}"
+  temperature: 0.7
+  max_tokens: 1024
+  timeout: 30
+
+comfyui:
+  enabled: true
+  base_url: "http://127.0.0.1:8188"
+  timeout: 120
+  output_dir: "../data/generated_images"
+
+arbitrator:
+  # 单次好感度浮动绝对值上限
+  max_affection_delta_per_turn: 3
+  # 未触发特定剧情事件前的关系上限（例如未表白前上限为 60）
+  pre_confession_cap: 60
+  # 疲劳衰减阈值（单次场景连续对话次数过多时好感收益衰减）
+  fatigue_turns_threshold: 8

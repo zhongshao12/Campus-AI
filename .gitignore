@@ -1,0 +1,46 @@
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python & Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/__pycache__/
+backend/*/__pycache__/
+backend/*/*/__pycache__/
+backend/*/*/*/__pycache__/
+.venv/
+venv/
+ENV/
+env/
+
+# Environment & Sensitive configs
+.env
+backend/.env
+*.local
+
+# Database & Runtime Data
+data/game.db
+data/game.db-journal
+data/generated_images/*
+!data/generated_images/.gitkeep
+data/saves/*
+!data/saves/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
