@@ -62,7 +62,8 @@ class DialogueLog(Base):
     __tablename__ = "dialogue_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    character_id = Column(String(50), index=True)  # 若是玩家则为 "player"
+    character_id = Column(String(50), index=True)  # 发言主体标识（若玩家则为 "player"）
+    target_character_id = Column(String(50), nullable=True, index=True)  # 对话指向的目标角色（彻底杜绝串线）
     speaker_name = Column(String(50), nullable=False)
     content = Column(Text, nullable=False)
     emotion = Column(String(30), default="neutral")
@@ -96,17 +97,77 @@ class EventRecord(Base):
     details = Column(JSON, default=dict)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+class GenerationJob(Base):
+    """ComfyUI / 云端生图任务记录表"""
+    __tablename__ = "generation_jobs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    prompt_id = Column(String(100), unique=True, nullable=False, index=True)
+    status = Column(String(30), default="pending")  # pending, processing, completed, failed
+    category = Column(String(30), default="cg")     # cg, selfie, sprite
+    character_id = Column(String(50), nullable=True)
+    prompt = Column(Text, nullable=False)
+    output_path = Column(String(255), nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+
 class ImageRecord(Base):
     __tablename__ = "image_records"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    prompt_id = Column(String(100), nullable=True)
-    category = Column(String(30), default="cg")  # cg, sprite, background
+    prompt_id = Column(String(100), nullable=True, index=True)
+    category = Column(String(30), default="cg")  # cg, sprite, background, selfie
     character_id = Column(String(50), nullable=True)
     prompt = Column(Text, nullable=False)
     file_path = Column(String(255), nullable=False)
     unlocked = Column(Boolean, default=True)
     title = Column(String(100), default="新回忆 CG")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class PhoneMessage(Base):
+    """手机聊天持久化表"""
+    __tablename__ = "phone_messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    contact_id = Column(String(50), nullable=False, index=True)  # lin_yuqing, group_lit 等
+    sender_id = Column(String(50), nullable=False)               # player, lin_yuqing, su_wanxing
+    sender_name = Column(String(50), nullable=False)
+    text = Column(Text, nullable=False)
+    msg_type = Column(String(20), default="text")                # text, image, photo_prompt
+    image_url = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class MomentPost(Base):
+    """校园朋友圈动态表"""
+    __tablename__ = "moment_posts"
+
+    id = Column(String(50), primary_key=True)
+    author_id = Column(String(50), nullable=False)
+    author_name = Column(String(50), nullable=False)
+    avatar = Column(String(20), default="👧")
+    time_str = Column(String(50), default="刚刚")
+    content = Column(Text, nullable=False)
+    image_url = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class MomentLike(Base):
+    """朋友圈点赞表"""
+    __tablename__ = "moment_likes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    moment_id = Column(String(50), nullable=False, index=True)
+    user_name = Column(String(50), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class MomentComment(Base):
+    """朋友圈评论表"""
+    __tablename__ = "moment_comments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    moment_id = Column(String(50), nullable=False, index=True)
+    author_name = Column(String(50), nullable=False)
+    text = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class SaveSlot(Base):

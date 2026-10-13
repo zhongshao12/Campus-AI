@@ -7,8 +7,8 @@ VALID_EMOTIONS = {"neutral", "happy", "blush", "surprised", "thinking", "pout", 
 
 class Arbitrator:
     """
-    游戏规则裁决器
-    负责审核、限制、修剪 AI 大模型提议的状态变动，确保游戏数值平衡与世界逻辑闭环。
+    游戏规则裁决器 (V0.1.1 强化版)
+    负责聚合审核、全局 Clamp 裁剪、疲劳衰减、阶段锁与恋人确认事件校验。
     """
 
     MAX_AFFECTION_DELTA = 3
@@ -42,87 +42,84 @@ class Arbitrator:
     ) -> Tuple[int, int, List[Dict[str, Any]]]:
         """
         裁决状态变动
-        返回: (applied_affection_delta, applied_trust_delta, applied_details)
+        核心改进：先预聚合所有提案总和，再进行全局单轮限制，防累计穿透攻击。
         """
-        applied_affection_delta = 0
-        applied_trust_delta = 0
-        applied_details = []
+        raw_aff_total = 0
+        raw_trust_total = 0
+        reasons = []
 
-        # 疲劳度/长对话衰减因子
-        fatigue_penalty = 1.0
-        if world_state.turns_in_current_scene >= cls.FATIGUE_TURNS_THRESHOLD:
-            fatigue_penalty = 0.5  # 聊太久了，好感度增长减半甚至停滞
-
+        # 1. 聚合所有同类效果提议
         for effect in proposed_effects:
             if effect.type == "affection_delta":
                 try:
-                    val = int(effect.value)
+                    raw_aff_total += int(effect.value)
+                    if effect.reason:
+                        reasons.append(effect.reason)
                 except (ValueError, TypeError):
-                    continue
-
-                # 1. 裁剪单次最大增减幅
-                clamped_val = max(cls.MIN_AFFECTION_DELTA, min(cls.MAX_AFFECTION_DELTA, val))
-
-                # 2. 疲劳衰减
-                if clamped_val > 0:
-                    clamped_val = int(round(clamped_val * fatigue_penalty))
-
-                # 3. 阶段好感度上限保护 (例如尚未表白突破时，上限为 60)
-                current_aff = relationship.affection
-                has_confessed = relationship.flags.get("confessed", False) if relationship.flags else False
-                
-                if not has_confessed and (current_aff + clamped_val > cls.PRE_CONFESSION_CAP):
-                    actual_delta = max(0, cls.PRE_CONFESSION_CAP - current_aff)
-                else:
-                    actual_delta = clamped_val
-
-                # 4. 数值不能低于 0 或超过 100
-                new_aff = max(0, min(100, current_aff + actual_delta))
-                final_delta = new_aff - current_aff
-
-                if final_delta != 0:
-                    applied_affection_delta += final_delta
-                    relationship.affection = new_aff
-                    applied_details.append({
-                        "type": "affection_change",
-                        "delta": final_delta,
-                        "current": new_aff,
-                        "reason": effect.reason or "对话互动"
-                    })
-
+                    pass
             elif effect.type == "trust_delta":
                 try:
-                    val = int(effect.value)
+                    raw_trust_total += int(effect.value)
                 except (ValueError, TypeError):
-                    continue
-                clamped_trust_delta = max(-2, min(2, val))
-                new_trust = max(0, min(100, relationship.trust + clamped_trust_delta))
-                t_delta = new_trust - relationship.trust
-                if t_delta != 0:
-                    applied_trust_delta += t_delta
-                    relationship.trust = new_trust
-                    applied_details.append({
-                        "type": "trust_change",
-                        "delta": t_delta,
-                        "current": new_trust,
-                    })
+                    pass
 
-        # 5. 根据新数值更新关系阶段
+        applied_details = []
+
+        # 2. 全局单轮好感裁剪 [-3, +3]
+        clamped_aff = max(cls.MIN_AFFECTION_DELTA, min(cls.MAX_AFFECTION_DELTA, raw_aff_total))
+
+        # 3. 疲劳度衰减
+        if world_state.turns_in_current_scene >= cls.FATIGUE_TURNS_THRESHOLD and clamped_aff > 0:
+            clamped_aff = max(1, clamped_aff // 2)
+
+        # 4. 阶段门槛锁 (未表白前上限锁死在 60)
+        has_confessed = relationship.flags.get("confessed", False) if relationship.flags else False
+        current_aff = relationship.affection
+        if not has_confessed and (current_aff + clamped_aff > cls.PRE_CONFESSION_CAP):
+            actual_aff_delta = max(0, cls.PRE_CONFESSION_CAP - current_aff)
+        else:
+            actual_aff_delta = clamped_aff
+
+        # 5. 执行好感更新
+        new_aff = max(0, min(100, current_aff + actual_aff_delta))
+        final_aff_delta = new_aff - current_aff
+        if final_aff_delta != 0:
+            relationship.affection = new_aff
+            applied_details.append({
+                "type": "affection_change",
+                "delta": final_aff_delta,
+                "current": new_aff,
+                "reason": "、".join(reasons) if reasons else "对话互动",
+            })
+
+        # 6. 信任度裁剪与更新 [-2, +2]
+        clamped_trust = max(-2, min(2, raw_trust_total))
+        new_trust = max(0, min(100, relationship.trust + clamped_trust))
+        final_trust_delta = new_trust - relationship.trust
+        if final_trust_delta != 0:
+            relationship.trust = new_trust
+            applied_details.append({
+                "type": "trust_change",
+                "delta": final_trust_delta,
+                "current": new_trust,
+            })
+
+        # 7. 关系阶段自动演化
         cls._update_relationship_stage(relationship)
 
-        return applied_affection_delta, applied_trust_delta, applied_details
+        return final_aff_delta, final_trust_delta, applied_details
 
     @classmethod
     def _update_relationship_stage(cls, relationship: Relationship):
-        """自动推导关系阶段"""
+        """关系阶段裁决：恋人阶段必须经过表白事件"""
         aff = relationship.affection
         has_confessed = relationship.flags.get("confessed", False) if relationship.flags else False
 
         if aff >= 80 and has_confessed:
-            relationship.stage = "lover"         # 恋人
+            relationship.stage = "lover"
         elif aff >= 50:
-            relationship.stage = "close"         # 亲密/暧昧
+            relationship.stage = "close"
         elif aff >= 20:
-            relationship.stage = "friend"        # 朋友
+            relationship.stage = "friend"
         else:
-            relationship.stage = "acquaintance"  # 熟人/普通同学
+            relationship.stage = "acquaintance"

@@ -16,10 +16,17 @@ class LLMClient:
     负责 Prompt 组装、结构化 JSON 解析与容错回退。
     """
 
-    def __init__(self):
-        self.api_key = settings.LLM_API_KEY
-        self.base_url = settings.LLM_BASE_URL.rstrip("/")
-        self.model = settings.LLM_MODEL
+    @property
+    def api_key(self) -> str:
+        return settings.LLM_API_KEY
+
+    @property
+    def base_url(self) -> str:
+        return settings.LLM_BASE_URL.rstrip("/")
+
+    @property
+    def model(self) -> str:
+        return settings.LLM_MODEL
 
     def _build_system_prompt(
         self,

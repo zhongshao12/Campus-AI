@@ -8,7 +8,12 @@ from .models import (
     DialogueLog,
     Memory,
     EventRecord,
+    GenerationJob,
     ImageRecord,
+    PhoneMessage,
+    MomentPost,
+    MomentLike,
+    MomentComment,
     SaveSlot,
 )
 
@@ -24,6 +29,11 @@ __all__ = [
     "DialogueLog",
     "Memory",
     "EventRecord",
+    "GenerationJob",
     "ImageRecord",
+    "PhoneMessage",
+    "MomentPost",
+    "MomentLike",
+    "MomentComment",
     "SaveSlot",
 ]

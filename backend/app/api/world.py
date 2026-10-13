@@ -10,7 +10,8 @@ from ..core.config import get_world_config, get_character_config
 router = APIRouter()
 
 TIME_SLOT_SEQUENCE = ["morning", "noon", "afternoon", "dusk", "night"]
-WEEKDAY_SEQUENCE = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+# Day 1 为星期三，因此序列以星期三为基点索引
+WEEKDAY_CYCLE = ["星期三", "星期四", "星期五", "星期六", "星期日", "星期一", "星期二"]
 
 @router.get("/state", response_model=WorldStateResponse)
 async def get_current_world_state(db: AsyncSession = Depends(get_db)):
@@ -73,20 +74,26 @@ async def advance_time_slot(
     if not world:
         raise HTTPException(status_code=500, detail="世界未初始化")
 
+    world_cfg = get_world_config()
+    valid_ids = [l["id"] for l in world_cfg.get("locations", [])]
+
+    # 校验可选的目标地点合法性
+    if req and req.target_location:
+        if req.target_location not in valid_ids:
+            raise HTTPException(status_code=400, detail=f"目标地点不存在: {req.target_location}")
+        world.player_location = req.target_location
+
     current_idx = TIME_SLOT_SEQUENCE.index(world.time_slot) if world.time_slot in TIME_SLOT_SEQUENCE else 0
     if current_idx < len(TIME_SLOT_SEQUENCE) - 1:
         world.time_slot = TIME_SLOT_SEQUENCE[current_idx + 1]
     else:
-        # 进入下一天
+        # 跨入下一天
         world.time_slot = TIME_SLOT_SEQUENCE[0]
         world.day_number += 1
-        day_idx = (world.day_number - 1) % 7
-        world.weekday = WEEKDAY_SEQUENCE[day_idx]
+        cycle_idx = (world.day_number - 1) % len(WEEKDAY_CYCLE)
+        world.weekday = WEEKDAY_CYCLE[cycle_idx]
 
     world.turns_in_current_scene = 0
-
-    if req and req.target_location:
-        world.player_location = req.target_location
 
     # 根据时段自动更新 NPC 日程位置
     chars_res = await db.execute(select(CharacterState))

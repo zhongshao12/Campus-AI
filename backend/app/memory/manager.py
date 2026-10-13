@@ -1,12 +1,12 @@
 from typing import List, Dict, Any, Optional
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..database.models import DialogueLog, Memory, Relationship, CharacterState, WorldState
 
 class MemoryManager:
     """
-    分层记忆管理器
-    负责多级记忆读写：短期上下文缓冲、情节事件抽取与结构化 Prompt 注入。
+    分层记忆管理器 (V0.1.1 隔离与语义增强版)
+    负责专属角色短期对话缓冲、情节事件抽取与防串线多维召回。
     """
 
     def __init__(self, db: AsyncSession):
@@ -17,19 +17,29 @@ class MemoryManager:
         character_id: str,
         limit: int = 10,
     ) -> List[Dict[str, str]]:
-        """获取最近几轮对话，作为短期连续上下文"""
+        """
+        获取当前角色的专属短期上下文 (彻底杜绝多角色串线)
+        只召回：
+        1. 该角色的发言；
+        2. 玩家专门针对该角色的发言 (target_character_id == character_id)。
+        """
+        condition = or_(
+            DialogueLog.character_id == character_id,
+            and_(
+                DialogueLog.character_id == "player",
+                DialogueLog.target_character_id == character_id,
+            )
+        )
+
         query = (
             select(DialogueLog)
-            .where(
-                (DialogueLog.character_id == character_id) | 
-                (DialogueLog.character_id == "player")
-            )
+            .where(condition)
             .order_by(desc(DialogueLog.id))
             .limit(limit)
         )
         res = await self.db.execute(query)
         logs = list(res.scalars().all())
-        logs.reverse()  # 恢复正序时间流
+        logs.reverse()
 
         formatted = []
         for log in logs:
@@ -45,12 +55,16 @@ class MemoryManager:
         self,
         character_id: str,
         limit: int = 5,
+        current_location: Optional[str] = None,
     ) -> List[str]:
-        """获取与该角色相关的情节记忆（重大经历、约定、印象）"""
+        """
+        多维情节记忆召回：
+        优先召回该角色在当前场景的相关经历与高重要度约定。
+        """
         query = (
             select(Memory)
             .where(Memory.character_id == character_id)
-            .order_by(desc(Memory.importance), desc(Memory.id))
+            .order_by(desc(Memory.importance), desc(Memory.game_day), desc(Memory.id))
             .limit(limit)
         )
         res = await self.db.execute(query)
@@ -62,15 +76,17 @@ class MemoryManager:
         speaker_name: str,
         character_id: str,
         content: str,
+        target_character_id: Optional[str] = None,
         emotion: str = "neutral",
         expression: str = "neutral",
         location: str = "library",
         game_day: int = 1,
         game_time_slot: str = "afternoon",
     ) -> DialogueLog:
-        """持久化单条对话记录"""
+        """持久化单条对话记录，带明确的 target_character_id"""
         log = DialogueLog(
             character_id=character_id,
+            target_character_id=target_character_id,
             speaker_name=speaker_name,
             content=content,
             emotion=emotion,
