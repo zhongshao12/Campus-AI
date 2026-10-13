@@ -117,7 +117,6 @@ watch(
 .galgame-dialogue-wrapper {
   position: relative;
   width: 100%;
-  max-width: 980px;
   margin: 0 auto;
   cursor: pointer;
   user-select: none;

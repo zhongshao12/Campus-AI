@@ -49,20 +49,26 @@
         </div>
       </main>
 
-      <!-- 底部互动交互区 (经典 Gal 对话框 + 自由输入栏) -->
-      <footer class="interaction-area">
-        <DialogueBox
-          :speaker="gameStore.currentSpeaker"
-          :text="gameStore.currentDialogue"
-          :emotion="gameStore.currentEmotion"
-          :action="gameStore.currentAction"
-          :inner-thought="gameStore.currentInnerThought"
-        />
+      <!-- 经典 Gal 舞台底部交互区 (对标 galgame-with-comfyUI 经典舞台布局) -->
+      <footer class="gal-stage-interface">
+        <!-- 浮动在对话框右上方：自由回应与快捷选项气泡 -->
+        <div class="gal-choices-composer">
+          <PlayerInputBar
+            :disabled="gameStore.isGenerating"
+            @send="handleUserSend"
+          />
+        </div>
 
-        <PlayerInputBar
-          :disabled="gameStore.isGenerating"
-          @send="handleUserSend"
-        />
+        <!-- 紧贴屏幕最底部的宽幅切角暖纸对话框 -->
+        <div class="gal-bottom-dialogue">
+          <DialogueBox
+            :speaker="gameStore.currentSpeaker"
+            :text="gameStore.currentDialogue"
+            :emotion="gameStore.currentEmotion"
+            :action="gameStore.currentAction"
+            :inner-thought="gameStore.currentInnerThought"
+          />
+        </div>
       </footer>
     </div>
 
@@ -353,14 +359,30 @@ body {
   color: #cbd5e1;
 }
 
-/* 底部交互区 */
-.interaction-area {
-  position: relative;
-  z-index: 20;
-  width: 100%;
-  padding: 0 24px;
+/* 底部交互区：对话框置于最下方，选项与输入栏置于右上方 (galgame-with-comfyUI 经典舞台布局) */
+.gal-stage-interface {
+  position: absolute;
+  bottom: 16px;
+  left: 3%;
+  right: 3%;
+  max-width: 1080px;
+  margin: 0 auto;
+  z-index: 30;
   display: flex;
   flex-direction: column;
+  pointer-events: none;
+}
+
+.gal-choices-composer {
+  align-self: flex-end;
+  width: min(440px, 48%);
+  margin-bottom: 8px;
+  pointer-events: auto;
+}
+
+.gal-bottom-dialogue {
+  width: 100%;
+  pointer-events: auto;
 }
 
 /* Toast 浮动提示 */

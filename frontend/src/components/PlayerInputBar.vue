@@ -83,11 +83,10 @@ const handleSend = () => {
 <style scoped>
 .input-bar-container {
   width: 100%;
-  max-width: 980px;
-  margin: 10px auto 16px auto;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   z-index: 30;
 }
 
@@ -95,8 +94,9 @@ const handleSend = () => {
 .quick-actions-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 4px;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 2px;
   overflow-x: auto;
   scrollbar-width: none;
 }
