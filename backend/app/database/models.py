@@ -22,6 +22,36 @@ class Player(Base):
     name = Column(String(50), nullable=False, default="你")
     gender = Column(String(10), default="male")
     major = Column(String(50), default="计算机科学与技术")
+    energy = Column(Integer, default=100)      # 体力 (0~100)
+    mood = Column(String(20), default="happy")  # 心情
+    money = Column(Integer, default=300)       # 零花钱
+    inventory = Column(JSON, default=lambda: {"orange_soda": 1})  # 背包物品
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class GameStateRevision(Base):
+    """全局变量状态版本与修订追踪表"""
+    __tablename__ = "game_state_revisions"
+
+    id = Column(Integer, primary_key=True, default=1)
+    revision = Column(Integer, default=1, nullable=False)        # 每次任何变量变更递增
+    schema_version = Column(Integer, default=1, nullable=False)  # 变量结构规范版本
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class VariableChange(Base):
+    """变量变更审计日志表 (追溯每一次状态变化因果)"""
+    __tablename__ = "variable_changes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    turn_id = Column(Integer, nullable=True, index=True)
+    revision_before = Column(Integer, nullable=False)
+    revision_after = Column(Integer, nullable=False)
+    source = Column(String(50), default="system")  # dialogue, system, action, phone
+    character_id = Column(String(50), nullable=True, index=True)
+    path = Column(String(200), nullable=False)     # /characters/lin_yuqing/relationship/affection
+    op = Column(String(20), nullable=False)        # delta, replace
+    old_value = Column(String(100), nullable=False)
+    new_value = Column(String(100), nullable=False)
+    reason = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class WorldState(Base):
@@ -54,6 +84,7 @@ class Relationship(Base):
     character_id = Column(String(50), unique=True, nullable=False, index=True)
     affection = Column(Integer, default=15)  # 好感度 (0~100)
     trust = Column(Integer, default=10)      # 信任度 (0~100)
+    familiarity = Column(Integer, default=20) # 熟悉度 (0~100)
     stage = Column(String(30), default="acquaintance")  # acquaintance, friend, close, crush, lover
     flags = Column(JSON, default=dict)       # 特殊标记与约定字典
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -98,7 +129,6 @@ class EventRecord(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class GenerationJob(Base):
-    """ComfyUI / 云端生图任务记录表"""
     __tablename__ = "generation_jobs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -117,7 +147,7 @@ class ImageRecord(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     prompt_id = Column(String(100), nullable=True, index=True)
-    category = Column(String(30), default="cg")  # cg, sprite, background, selfie
+    category = Column(String(30), default="cg")
     character_id = Column(String(50), nullable=True)
     prompt = Column(Text, nullable=False)
     file_path = Column(String(255), nullable=False)
@@ -126,20 +156,18 @@ class ImageRecord(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class PhoneMessage(Base):
-    """手机聊天持久化表"""
     __tablename__ = "phone_messages"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    contact_id = Column(String(50), nullable=False, index=True)  # lin_yuqing, group_lit 等
-    sender_id = Column(String(50), nullable=False)               # player, lin_yuqing, su_wanxing
+    contact_id = Column(String(50), nullable=False, index=True)
+    sender_id = Column(String(50), nullable=False)
     sender_name = Column(String(50), nullable=False)
     text = Column(Text, nullable=False)
-    msg_type = Column(String(20), default="text")                # text, image, photo_prompt
+    msg_type = Column(String(20), default="text")
     image_url = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class MomentPost(Base):
-    """校园朋友圈动态表"""
     __tablename__ = "moment_posts"
 
     id = Column(String(50), primary_key=True)
@@ -152,7 +180,6 @@ class MomentPost(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class MomentLike(Base):
-    """朋友圈点赞表"""
     __tablename__ = "moment_likes"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -161,7 +188,6 @@ class MomentLike(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class MomentComment(Base):
-    """朋友圈评论表"""
     __tablename__ = "moment_comments"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -174,7 +200,7 @@ class SaveSlot(Base):
     __tablename__ = "save_slots"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    slot_index = Column(Integer, unique=True, nullable=False)  # 1~10
+    slot_index = Column(Integer, unique=True, nullable=False)
     title = Column(String(100), nullable=False)
     snapshot = Column(JSON, nullable=False)
     saved_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

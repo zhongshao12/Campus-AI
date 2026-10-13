@@ -43,11 +43,35 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def init_db():
     """初始化数据库表并注入初始世界和角色状态"""
+    from sqlalchemy import text
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+        # 安全无损列自动迁移 (为已有旧数据表补齐新增字段)
+        migrations = [
+            ("players", "energy", "INTEGER DEFAULT 100"),
+            ("players", "mood", "VARCHAR(20) DEFAULT 'happy'"),
+            ("players", "money", "INTEGER DEFAULT 300"),
+            ("players", "inventory", "JSON DEFAULT '{}'"),
+            ("dialogue_logs", "target_character_id", "VARCHAR(50)"),
+            ("relationships", "familiarity", "INTEGER DEFAULT 20"),
+        ]
+        for tbl, col, col_def in migrations:
+            try:
+                await conn.execute(text(f"ALTER TABLE {tbl} ADD COLUMN {col} {col_def}"))
+            except Exception:
+                pass
+
     async with AsyncSessionLocal() as session:
         from sqlalchemy import select
+
+        # 0. GameStateRevision (全局变量版本初始化)
+        from .models import GameStateRevision
+        rev_res = await session.execute(select(GameStateRevision).limit(1))
+        state_rev = rev_res.scalar_one_or_none()
+        if not state_rev:
+            state_rev = GameStateRevision(id=1, revision=1, schema_version=1)
+            session.add(state_rev)
 
         # 1. Player
         res = await session.execute(select(Player).limit(1))

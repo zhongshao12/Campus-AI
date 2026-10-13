@@ -50,6 +50,10 @@
         <span class="btn-icon">⏳</span>
         <span class="btn-label">时钟</span>
       </button>
+      <button class="hud-btn" @click="$emit('open-variables')" title="变量监控 (V)">
+        <span class="btn-icon">📊</span>
+        <span class="btn-label">变量</span>
+      </button>
       <button class="hud-btn" @click="$emit('open-history')" title="对话回顾">
         <span class="btn-icon">📜</span>
         <span class="btn-label">回顾</span>
@@ -81,6 +85,7 @@ defineEmits<{
   (e: 'open-history'): void
   (e: 'open-saves'): void
   (e: 'open-phone'): void
+  (e: 'open-variables'): void
   (e: 'go-title'): void
 }>()
 

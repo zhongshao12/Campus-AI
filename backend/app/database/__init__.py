@@ -2,6 +2,8 @@ from .session import get_db, init_db, AsyncSessionLocal
 from .models import (
     Base,
     Player,
+    GameStateRevision,
+    VariableChange,
     WorldState,
     CharacterState,
     Relationship,
@@ -23,6 +25,8 @@ __all__ = [
     "AsyncSessionLocal",
     "Base",
     "Player",
+    "GameStateRevision",
+    "VariableChange",
     "WorldState",
     "CharacterState",
     "Relationship",

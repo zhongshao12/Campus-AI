@@ -46,6 +46,11 @@ async def save_game_to_slot(
     if slot_index < 1 or slot_index > 10:
         raise HTTPException(status_code=400, detail="槽位编号必须在 1~10 之间")
 
+    # 0. 变量版本
+    from ..database.models import GameStateRevision
+    rev_res = await db.execute(select(GameStateRevision).limit(1))
+    state_rev = rev_res.scalar_one_or_none()
+
     # 1. 世界状态
     w_res = await db.execute(select(WorldState).limit(1))
     world = w_res.scalar_one_or_none()
@@ -110,6 +115,7 @@ async def save_game_to_slot(
     ]
 
     snapshot = {
+        "revision": state_rev.revision if state_rev else 1,
         "world": {
             "day_number": world.day_number if world else 1,
             "weekday": world.weekday if world else "星期三",
@@ -155,6 +161,13 @@ async def load_game_from_slot(slot_index: int, db: AsyncSession = Depends(get_db
         raise HTTPException(status_code=404, detail="该存档槽位为空")
 
     data = slot.snapshot
+
+    # 0. 恢复变量修订版本号
+    from ..database.models import GameStateRevision
+    rev_res = await db.execute(select(GameStateRevision).limit(1))
+    state_rev = rev_res.scalar_one_or_none()
+    if state_rev:
+        state_rev.revision = data.get("revision", 1)
 
     # 1. 恢复世界状态
     w_data = data.get("world", {})

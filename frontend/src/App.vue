@@ -28,6 +28,7 @@
         :world="gameStore.world"
         :character="gameStore.character"
         @open-phone="showPhone = true"
+        @open-variables="showVariables = true"
         @open-map="showMap = true"
         @advance-time="gameStore.advanceTimeSlot"
         @open-history="showHistory = true"
@@ -116,6 +117,13 @@
       @close="showHistory = false"
     />
 
+    <!-- 变量与状态监控面板 -->
+    <VariablePanel
+      v-if="showVariables"
+      @close="showVariables = false"
+      @toast="gameStore.showToast"
+    />
+
     <!-- 游戏设置弹窗 (LLM Key / ComfyUI) -->
     <SettingsModal
       v-if="showSettings"
@@ -138,6 +146,7 @@ import SaveModal from './components/SaveModal.vue'
 import HistoryModal from './components/HistoryModal.vue'
 import Smartphone from './components/Smartphone.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import VariablePanel from './components/VariablePanel.vue'
 
 const gameStore = useGameStore()
 
@@ -145,6 +154,7 @@ const gameStore = useGameStore()
 const viewMode = ref<'title' | 'game'>('title')
 
 const showPhone = ref(false)
+const showVariables = ref(false)
 const showMap = ref(false)
 const showSaves = ref(false)
 const showHistory = ref(false)
@@ -183,8 +193,13 @@ const handleKeyDown = (e: KeyboardEvent) => {
     if (viewMode.value === 'game') {
       showPhone.value = !showPhone.value
     }
+  } else if (e.key === 'v' || e.key === 'V') {
+    if (viewMode.value === 'game') {
+      showVariables.value = !showVariables.value
+    }
   } else if (e.key === 'Escape') {
     showPhone.value = false
+    showVariables.value = false
     showMap.value = false
     showSaves.value = false
     showHistory.value = false
