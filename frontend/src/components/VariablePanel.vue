@@ -82,9 +82,9 @@
         <div class="section-box">
           <div class="section-title">👤 玩家核心状态 (Player State)</div>
           <div class="key-value-list">
-            <div class="kv-item"><span class="k">体力值 (Energy):</span> <span class="v">{{ snapshot?.player.energy || 100 }} / 100</span></div>
-            <div class="kv-item"><span class="k">钱包金钱 (Money):</span> <span class="v">¥ {{ snapshot?.player.money || 300 }}</span></div>
-            <div class="kv-item"><span class="k">背包物品 (Inventory):</span> <span class="v">{{ JSON.stringify(snapshot?.player.inventory || {}) }}</span></div>
+            <div class="kv-item"><span class="k">体力值 (Energy):</span> <span class="v">{{ snapshot?.player.energy ?? 100 }} / 100</span></div>
+            <div class="kv-item"><span class="k">钱包金钱 (Money):</span> <span class="v">¥ {{ snapshot?.player.money ?? 300 }}</span></div>
+            <div class="kv-item"><span class="k">背包物品 (Inventory):</span> <span class="v">{{ JSON.stringify(snapshot?.player.inventory ?? {}) }}</span></div>
           </div>
         </div>
 

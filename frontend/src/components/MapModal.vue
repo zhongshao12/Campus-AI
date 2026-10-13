@@ -65,6 +65,12 @@ const locations = [
     icon: '🏃',
     desc: '红白相间的开阔跑道，黄昏时晚霞如燃烧般艳丽，看台微风让人心旷神怡。',
   },
+  {
+    id: 'dormitory',
+    name: '学生宿舍区·林荫道',
+    icon: '🌙',
+    desc: '静谧温馨的生活区，常青樟树下有自动贩卖机与微风，夜间灯火温暖。',
+  },
 ]
 
 const selectLocation = (id: string) => {

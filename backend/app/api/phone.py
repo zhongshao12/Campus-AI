@@ -14,8 +14,10 @@ from ..database.models import (
     MomentLike,
     MomentComment,
 )
-from ..ai.llm.provider import ProviderManager
 from ..ai.comfyui.client import ComfyUIClient
+from ..variables.snapshot import SnapshotBuilder
+from ..variables.schemas import VariablePatch, VariableOperation
+from ..variables.engine import VariableEngine
 
 router = APIRouter()
 comfy_client = ComfyUIClient()
@@ -31,6 +33,23 @@ class CommentRequest(BaseModel):
 class PhotoRequest(BaseModel):
     character_id: str = "lin_yuqing"
     scene_description: str = "cute selfie in university library, smiling"
+
+async def _apply_phone_affection_reward(character_id: str, delta: int, reason: str, db: AsyncSession):
+    """统一走 VariableEngine 进行手机交互的好感度裁决与版本递增"""
+    snapshot = await SnapshotBuilder.build_snapshot(db)
+    patch = VariablePatch(
+        base_revision=snapshot.revision,
+        operations=[
+            VariableOperation(
+                op="delta",
+                path=f"/characters/{character_id}/relationship/affection",
+                value=delta,
+                reason=reason,
+            )
+        ],
+        source="phone",
+    )
+    await VariableEngine.apply_patch(patch, db=db, trusted_system=True)
 
 @router.get("/contacts")
 async def get_contacts(db: AsyncSession = Depends(get_db)):
@@ -112,8 +131,7 @@ async def send_phone_message(
     req: SendMessageRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """通过手机发送消息，数据库事务原子写入"""
-    # 1. 持久化玩家消息
+    """通过手机发送消息，统一通过 VariableEngine 裁决好感度并入库"""
     my_msg = PhoneMessage(
         contact_id=req.target_id,
         sender_id="player",
@@ -127,9 +145,6 @@ async def send_phone_message(
     reply_msg_data = None
 
     if req.target_id == "lin_yuqing":
-        rel_res = await db.execute(select(Relationship).where(Relationship.character_id == "lin_yuqing"))
-        rel = rel_res.scalar_one_or_none()
-
         text_lower = req.text.lower()
         if "自拍" in text_lower or "照片" in text_lower or "看看你" in text_lower:
             reply_text = "诶？突然要看照片呀……等我找一张刚才拍的给你看，不许笑我哦！📸"
@@ -140,8 +155,8 @@ async def send_phone_message(
         elif "喜欢" in text_lower or "想你" in text_lower:
             reply_text = "（秒回）……笨蛋，手机屏幕上突然弹出来这个，差点被旁边的同学看到了啦！⁄(⁄ ⁄•⁄-⁄•⁄ ⁄)⁄"
             reply_type = "text"
-            if rel:
-                rel.affection = min(100, rel.affection + 1)
+            # 统一通过变量引擎裁决好感
+            await _apply_phone_affection_reward("lin_yuqing", 1, "手机收到心动表白私信", db)
         else:
             reply_text = f"看到你的消息啦！“{req.text}”是吧？等下自习结束我们当面聊聊呀~ ✨"
             reply_type = "text"
@@ -211,11 +226,9 @@ async def get_moments(db: AsyncSession = Depends(get_db)):
 
     results = []
     for p in posts:
-        # 查询点赞
         likes_res = await db.execute(select(MomentLike.user_name).where(MomentLike.moment_id == p.id))
         likes = list(likes_res.scalars().all())
 
-        # 查询评论
         cmts_res = await db.execute(
             select(MomentComment).where(MomentComment.moment_id == p.id).order_by(MomentComment.id.asc())
         )
@@ -236,7 +249,10 @@ async def get_moments(db: AsyncSession = Depends(get_db)):
 
 @router.post("/moments/{moment_id}/like")
 async def like_moment(moment_id: str, db: AsyncSession = Depends(get_db)):
-    """数据库级持久化点赞"""
+    """
+    点赞朋友圈动态 (V0.2.1 防刷好感机制)
+    只有首次点赞给予好感度增益，取消再点不重复赠送；统一经由 VariableEngine 校验。
+    """
     like_res = await db.execute(
         select(MomentLike).where(MomentLike.moment_id == moment_id, MomentLike.user_name == "你")
     )
@@ -250,14 +266,20 @@ async def like_moment(moment_id: str, db: AsyncSession = Depends(get_db)):
         db.add(new_like)
         liked = True
 
-        # 给林雨晴点赞加好感
+        # 检查是否为首次点赞（通过查询当前角色的约定flags判断，防止反复取消再点刷分）
         post_res = await db.execute(select(MomentPost).where(MomentPost.id == moment_id))
         post = post_res.scalar_one_or_none()
         if post and post.author_id == "lin_yuqing":
             rel_res = await db.execute(select(Relationship).where(Relationship.character_id == "lin_yuqing"))
             rel = rel_res.scalar_one_or_none()
             if rel:
-                rel.affection = min(100, rel.affection + 1)
+                flags = rel.flags or {}
+                liked_key = f"liked_moment_{moment_id}"
+                if not flags.get(liked_key):
+                    flags[liked_key] = True
+                    rel.flags = flags
+                    # 走统一变量引擎
+                    await _apply_phone_affection_reward("lin_yuqing", 1, "朋友圈动态首次点赞心动", db)
 
     await db.commit()
 
@@ -272,7 +294,7 @@ async def comment_moment(
     req: CommentRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    """发表朋友圈评论并由角色互动持久化落库"""
+    """发表朋友圈评论并由角色互动，经由 VariableEngine 统一更新好感"""
     my_cmt = MomentComment(moment_id=moment_id, author_name="你", text=req.content)
     db.add(my_cmt)
 
@@ -285,14 +307,11 @@ async def comment_moment(
         author_cmt = MomentComment(moment_id=moment_id, author_name="林雨晴", text=reply_text)
         db.add(author_cmt)
 
-        rel_res = await db.execute(select(Relationship).where(Relationship.character_id == "lin_yuqing"))
-        rel = rel_res.scalar_one_or_none()
-        if rel:
-            rel.affection = min(100, rel.affection + 1)
+        # 走统一变量引擎
+        await _apply_phone_affection_reward("lin_yuqing", 1, "朋友圈互动暖心评论", db)
 
     await db.commit()
 
-    # 读取全部评论
     all_cmts = await db.execute(
         select(MomentComment).where(MomentComment.moment_id == moment_id).order_by(MomentComment.id.asc())
     )

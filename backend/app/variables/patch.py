@@ -1,6 +1,5 @@
 import re
-from typing import Optional, Tuple, Dict, Any
-from .schemas import VariableOperation
+from typing import Optional
 
 # 标准路径格式正则支持:
 # 1. /characters/{char_id}/relationship/{prop}
@@ -26,17 +25,23 @@ class ParsedPath:
         self.property_name = property_name
 
     def to_rule_key(self) -> str:
-        """映射到 VARIABLE_RULES 注册表的主键"""
-        if self.domain == "characters":
-            return self.property_name
+        """
+        映射到 VARIABLE_RULES 注册表中的完整规范键
+        例: characters.relationship.affection, characters.state.current_mood, player.money
+        """
+        if self.domain == "characters" and self.sub_domain:
+            return f"characters.{self.sub_domain}.{self.property_name}"
         elif self.domain == "player":
-            return f"player_{self.property_name}"
+            return f"player.{self.property_name}"
         elif self.domain == "world":
-            return self.property_name
-        return self.property_name
+            return f"world.{self.property_name}"
+        return f"{self.domain}.{self.property_name}"
 
 def parse_variable_path(path: str) -> Optional[ParsedPath]:
     """解析标准化变量路径"""
+    if not path or not path.startswith("/"):
+        return None
+
     m_char = CHAR_PATH_PATTERN.match(path)
     if m_char:
         return ParsedPath(

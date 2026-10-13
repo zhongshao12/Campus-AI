@@ -34,6 +34,43 @@ export const useGameStore = defineStore('game', () => {
     }, duration)
   }
 
+  // 开启全新游戏 (彻底重置后端与前端演出状态)
+  const startNewGame = async () => {
+    try {
+      isGenerating.value = true
+      await gameApi.startNewGame()
+      await initGame()
+
+      // 重置全部前端演出状态
+      historyLogs.value = []
+      currentSpeaker.value = '林雨晴'
+      currentDialogue.value = '嗨！你也来图书馆自习呀？今天下午阳光真好呢~'
+      currentEmotion.value = 'happy'
+      currentExpression.value = 'happy'
+      currentAction.value = '微笑着抬起头看向你'
+      currentInnerThought.value = '新学期的第一天，好巧又遇见他了。'
+      showToast('🌸 全新大学恋爱篇章已开启！')
+    } catch (err) {
+      console.error('开启新游戏失败:', err)
+      showToast('重置新游戏失败')
+    } finally {
+      isGenerating.value = false
+    }
+  }
+
+  // 读档后重置演出状态
+  const reloadFromSave = async () => {
+    await initGame()
+    historyLogs.value = []
+    currentSpeaker.value = '旁白'
+    currentDialogue.value = `记忆浮现……你回到了【${world.value?.location_name || '大学校园'}】。`
+    currentEmotion.value = 'neutral'
+    currentExpression.value = 'neutral'
+    currentAction.value = null
+    currentInnerThought.value = null
+    showToast('💾 进度已恢复！')
+  }
+
   // 初始化游戏状态
   const initGame = async () => {
     try {
@@ -161,6 +198,8 @@ export const useGameStore = defineStore('game', () => {
     activeCgUrl,
     historyLogs,
     showToast,
+    startNewGame,
+    reloadFromSave,
     initGame,
     sendMessage,
     moveTo,

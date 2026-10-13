@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
@@ -7,7 +7,7 @@ from ..database.session import get_db
 from ..database.models import VariableChange, GameStateRevision
 from ..variables.schemas import VariableSnapshot, VariablePatch, ApplyPatchResult
 from ..variables.snapshot import SnapshotBuilder
-from ..variables.engine import VariableEngine
+from ..variables.engine import VariableEngine, RevisionConflictError
 
 router = APIRouter()
 
@@ -54,9 +54,30 @@ async def apply_variable_patch(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    提交变量补丁更新
-    经过 VariableEngine 的权限拦截、单轮限幅、所有权校验与版本递增
+    提交变量补丁更新 (V0.2.1 安全强化版)
+    1. 强制设定 source='external_client'，严禁外部请求自称 system 绕过鉴权；
+    2. 严格乐观锁版本校验，若基线版本与当前数据库不一致抛出 409 冲突拒绝。
     """
-    result = await VariableEngine.apply_patch(patch=patch, db=db)
-    await db.commit()
-    return result
+    # 强制防伪装来源
+    patch.source = "external_client"
+
+    try:
+        result = await VariableEngine.apply_patch(
+            patch=patch,
+            db=db,
+            trusted_system=False,
+        )
+        await db.commit()
+        return result
+    except RevisionConflictError as err:
+        rev_res = await db.execute(select(GameStateRevision).limit(1))
+        current_rev = rev_res.scalar_one().revision if rev_res else 1
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "REVISION_CONFLICT",
+                "message": str(err),
+                "current_revision": current_rev,
+                "submitted_revision": patch.base_revision,
+            }
+        )

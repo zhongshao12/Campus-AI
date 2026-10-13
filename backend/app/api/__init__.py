@@ -7,8 +7,10 @@ from .phone import router as phone_router
 from .settings import router as settings_router
 from .images import router as images_router
 from .variables import router as variables_router
+from .game import router as game_router
 
 api_router = APIRouter()
+api_router.include_router(game_router, prefix="/game", tags=["Game"])
 api_router.include_router(dialogue_router, prefix="/dialogue", tags=["Dialogue"])
 api_router.include_router(world_router, prefix="/world", tags=["World"])
 api_router.include_router(characters_router, prefix="/characters", tags=["Characters"])

@@ -163,20 +163,19 @@ const showSettings = ref(false)
 const currentLocation = computed(() => gameStore.world?.player_location || 'library')
 const currentTimeSlot = computed(() => gameStore.world?.time_slot || 'afternoon')
 
-// 判断林雨晴是否在当前地点
+// 判断林雨晴是否真实在当前地点 (修复旧 speaker 残留导致缺席 NPC 仍显示在立绘层的问题)
 const isCharacterPresent = computed(() => {
   const chars = gameStore.world?.present_characters || []
-  return chars.includes('lin_yuqing') || gameStore.currentSpeaker === '林雨晴'
+  return chars.includes('lin_yuqing')
 })
 
 const handleStartGame = async () => {
   viewMode.value = 'game'
-  await gameStore.initGame()
-  gameStore.showToast('📖 新学期的大学篇章正式开启！')
+  await gameStore.startNewGame()
 }
 
-const handleSaveLoaded = () => {
-  gameStore.initGame()
+const handleSaveLoaded = async () => {
+  await gameStore.reloadFromSave()
   viewMode.value = 'game'
 }
 

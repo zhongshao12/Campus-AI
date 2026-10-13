@@ -10,6 +10,17 @@ const apiClient = axios.create({
 })
 
 export const gameApi = {
+  // 游戏会话生命周期
+  async startNewGame(): Promise<any> {
+    const { data } = await apiClient.post('/game/new')
+    return data
+  },
+
+  async getCurrentGame(): Promise<any> {
+    const { data } = await apiClient.get('/game/current')
+    return data
+  },
+
   // 世界与场景
   async getWorldState(): Promise<WorldState> {
     const { data } = await apiClient.get<WorldState>('/world/state')

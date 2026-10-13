@@ -43,6 +43,18 @@ locations:
       - id: "rest_bench"
         name: "长椅吹风"
 
+  - id: "dormitory"
+    name: "学生宿舍区·林荫大道"
+    description: "静谧温馨的学生生活区，楼下有常青樟树和自动贩卖机，夜间泛着暖黄灯火。"
+    background_image: "dormitory_night.png"
+    available_actions:
+      - id: "rest"
+        name: "回寝休息"
+      - id: "vending"
+        name: "买罐汽水"
+      - id: "night_chat"
+        name: "树下夜谈"
+
 time_slots:
   - id: "morning"
     name: "早晨"
